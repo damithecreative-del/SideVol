@@ -14,6 +14,8 @@ import android.view.accessibility.AccessibilityManager;
 import java.util.List;
 
 public class MainActivity extends Activity {
+    private Button button;
+
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         showScreen();
@@ -26,19 +28,22 @@ public class MainActivity extends Activity {
         root.setOrientation(LinearLayout.VERTICAL); root.setGravity(Gravity.CENTER); root.setPadding(48,48,48,48);
         TextView title = new TextView(this); title.setText("SideVol"); title.setTextSize(30); title.setGravity(Gravity.CENTER);
         TextView info = new TextView(this); info.setText("Floating volume controls without the physical buttons.\n\nSideVol uses an accessibility overlay because this device does not expose the normal overlay permission."); info.setTextSize(16); info.setGravity(Gravity.CENTER); info.setPadding(0,24,0,24);
-        Button button = new Button(this); button.setOnClickListener(v -> openAccessibilitySettings());
+        button = new Button(this); button.setOnClickListener(v -> openAccessibilitySettings());
         root.addView(title); root.addView(info); root.addView(button); setContentView(root);
-        updateButton(button);
+        updateButton();
     }
 
-    private void updateButton() { updateButton((Button) findViewById(android.R.id.button1)); }
-    private void updateButton(Button b) { if (b != null) b.setText(isServiceEnabled() ? "SideVol is active" : "Enable SideVol"); }
+    private void updateButton() { if (button != null) button.setText(isServiceEnabled() ? "SideVol is active" : "Enable SideVol"); }
 
     private boolean isServiceEnabled() {
         AccessibilityManager am = (AccessibilityManager) getSystemService(ACCESSIBILITY_SERVICE);
         List<AccessibilityServiceInfo> list = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
         String target = new ComponentName(this, VolumeOverlayService.class).flattenToString();
-        for (AccessibilityServiceInfo info : list) if (info.getResolveInfo().serviceInfo.getComponentName().flattenToString().equals(target)) return true;
+        for (AccessibilityServiceInfo info : list) {
+            android.content.pm.ServiceInfo si = info.getResolveInfo().serviceInfo;
+            String actual = new ComponentName(si.packageName, si.name).flattenToString();
+            if (actual.equals(target)) return true;
+        }
         return false;
     }
 
