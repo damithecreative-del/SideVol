@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">SideVol</string>
+    <string name="accessibility_description">SideVol uses an accessibility overlay to provide floating volume controls without the physical volume buttons.</string>
+</resources>
